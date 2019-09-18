@@ -60,7 +60,7 @@ def get_series_data():
             try:
 
                 # avoid series with invalid value.
-                if series == "\n" or series["value"] == "#":
+                if series is None or series == "\n" or series["value"] == "#":
                     continue
 
                 # get series url
