@@ -1,79 +1,88 @@
 import csv
 
-import pandas as pd
-import requests
 from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
-from w3lib.html import replace_entities
+import ftfy
+
+main_page_url = "https://www.subtorrents1.com/series-1/"
+output_csv_path = "/Users/sleira/Personal/series.csv"
 
 
-def simple_get(url: str):
+def get_html_page(url: str) -> BeautifulSoup:
     """
-    Attempts to get the content at `url` by making an HTTP GET request.
-    If the content-type of response is some kind of HTML/XML, return the
-    text content, otherwise return None.
+    Attempts to get the content at `main_page_url` by making an HTTP GET request.
+    If the content-type of response is some kind of HTML/XML and status code is 200, convert the content to `Beautiful Soap` object, otherwise return None.
     """
     try:
-        """
-        The closing() function ensures that any network resources are freed when they go out of scope in that with block. 
-        Using closing() like that is good practice and helps to prevent fatal errors and network timeouts.
-        """
+
+        # The closing() function ensures that any network resources are freed when they go out of scope in that with block.
+        # Using closing() like that is good practice and helps to prevent fatal errors and network timeouts.
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
         }
         with closing(get(url, headers=headers)) as response:
-            if is_good_response(response):
-                return response.content
+            if response.status_code == 200 and is_html_response(response):
+                return BeautifulSoup(response.content, "html.parser")
             else:
                 return None
 
-    except RequestException as e:
-        log_error('Error during requests to {0} : {1}'.format(url, str(e)))
+    except RequestException as r_ex:
+        log_error('Error during requests to {} : {}'.format(url, str(r_ex)))
         return None
 
 
-def is_good_response(resp) -> bool:
+def is_html_response(response) -> bool:
     """
-    Returns True if the response seems to be HTML, False otherwise.
+    Returns true if the content type seems be HTML else false.
     """
-    content_type = resp.headers['Content-Type'].lower()
-    return (resp.status_code == 200
-            and content_type is not None
+    content_type = response.headers['Content-Type'].lower()
+    return (content_type is not None
             and content_type.find('html') > -1)
 
 
 def log_error(e):
-    """
-    It is always a good idea to log errors.
-    This function just prints them, but you can
-    make it do anything.
-
-    html.find_all("select", {"id": "serie"})[0].contents[3]["value"]
-    """
     print(e)
 
 
-url = "https://www.subtorrents1.com/series-1/"
-path_csv = "/Users/sleira/Personal/series.csv"
-raw_html = simple_get(url)
+def get_series_data():
+    main_page = get_html_page(main_page_url)
+    with open(output_csv_path, mode='w') as series_file:
 
-html = BeautifulSoup(raw_html, "html.parser")
-with open(path_csv, mode='w') as series_file:
-    series_writer = csv.writer(series_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    series_writer.writerow(["Series url", "Series name", "Ficha tecnica"])
-    for series in html.find("select", {"id": "serie"}):
-        try:
-            if series == "\n" or series["value"] == "#":
-                continue
-            series_url = series["value"]
-            series_name = series.text
-            technical_series_detail = ""
-          #  raw_html = simple_get(series_url)
-          #  html_series = BeautifulSoup(raw_html, "html.parser")
-          #  technical_series_detail = html_series.select("div.fichserietecnica")[0].text
-            series_writer.writerow([series_url, series_name, technical_series_detail])
-        except Exception as e:
-            print(str(e))
+        series_writer = csv.writer(series_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+        # write the headers.
+        series_writer.writerow(["Series main_page_url", "Series name", "Ficha tecnica", "Resumen"])
+
+        # get series
+        for series in main_page.find("select", {"id": "serie"}):
+            try:
+
+                # avoid series with invalid value.
+                if series == "\n" or series["value"] == "#":
+                    continue
+
+                # get series url
+                series_url = ftfy.fix_text(series["value"])
+                # get series name
+                series_name = ftfy.fix_text(series.text)
+
+                # get with series detail
+                series_page = get_html_page(series_url)
+
+                # get technical series detail in div with id fichserietecnica
+                technical_series_detail = ftfy.fix_text(series_page.select("div.fichserietecnica")[0].text)
+
+                # get description in div with id fichseriedescrip
+                description = ftfy.fix_text(series_page.select("div.fichseriedescrip")[0].text)
+
+                # write new row in the csv
+                series_writer.writerow([series_url, series_name, technical_series_detail, description])
+
+                print(series_name)
+            except Exception as ex:
+                log_error(str(ex))
+
+
+get_series_data()
