@@ -1,7 +1,9 @@
 # web-scraping
 
-## create environment
+## install the project
 
-python3 -m venv <environment name>
+1- In the root directory run: `sh web-scraping.sh install`
 
- source environment/bin/activate 
+2- Active environment: `source web-scraping-env/bin/activate`
+
+3- Run the script: `python web-scraping.py`

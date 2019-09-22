@@ -5,7 +5,7 @@ from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 import ftfy
-
+import datetime
 main_page_url = "https://www.subtorrents1.com/series-1/"
 output_csv_path = "/Users/sleira/Personal/series.csv"
 
@@ -47,6 +47,7 @@ def log_error(e):
 
 
 def get_series_data():
+    print(datetime.datetime.utcnow())
     main_page = get_html_page(main_page_url)
     with open(output_csv_path, mode='w') as series_file:
 
