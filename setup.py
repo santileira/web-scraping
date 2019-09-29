@@ -4,7 +4,8 @@ requires = [
     'requests',
     'bs4',
     'ftfy',
-    'datetime'
+    'datetime',
+    'xlwt'
 ]
 
 setup(

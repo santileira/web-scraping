@@ -1,13 +1,15 @@
 import csv
-
 from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 import ftfy
-import datetime
+import xlwt
+from xlwt import Workbook
+
 main_page_url = "https://www.subtorrents1.com/series-1/"
-output_csv_path = "/Users/sleira/Personal/series.csv"
+output_csv_path = "/Users/aleira/Desktop/series1.csv"
+lectulandia_main_page_url = "https://www.lectulandia.co/book/#post-57669"
 
 
 def get_html_page(url: str) -> BeautifulSoup:
@@ -15,7 +17,6 @@ def get_html_page(url: str) -> BeautifulSoup:
     Attempts to get the content at `main_page_url` by making an HTTP GET request.
     If the content-type of response is some kind of HTML/XML and status code is 200, convert the content to `Beautiful Soap` object, otherwise return None.
     """
-    #prueba agus
     try:
 
         # The closing() function ensures that any network resources are freed when they go out of scope in that with block.
@@ -48,25 +49,101 @@ def log_error(e):
 
 
 def get_series_data():
-    print(datetime.datetime.utcnow())
+    # try:
+    # var = 10
+    """                   # Second Example
+    while var > 0:
+       print ("Current variable value :"+ var)
+       var = var -1
+       if var == 5:
+          break
+    """
+    # print ("Good bye!")
+    # Workbook is created
+    wb = Workbook()
+
+    # add_sheet is used to create sheet.
+    sheet1 = wb.add_sheet('Catalogo de series')
+    # write(fila, columna)
+    # Applying multiple styles
+    style = xlwt.easyxf('font: bold 1, color black;')
+
+    # Writing on specified sheet
+    # sheet.write(0, 0, 'SAMPLE', style)
+
     main_page = get_html_page(main_page_url)
+    lectulandia_main_page = get_html_page(lectulandia_main_page_url)
+
+    # get series
+    # var_libros = 0
+    # t=lectulandia_main_page.find("article",{"class":"card"})
+    # print(t)
+    # exit()
+    for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
+        #
+
+        # test=lectulandia_main_page.find("article", {"class": "card"})
+        # avoid series with invalid value.
+        if libros is None or libros == "\n" or libros.name=="header":
+           continue
+        # for x in range(0,4):
+        try:
+            div_titulo = libros.find("div", {"class": "details"})
+            titulo= div_titulo.find("a",{"class":"title"})
+            print(titulo.attrs['title'])
+        except Exception:
+            print("error")
+        # print(lectulandia_main_page)
+        # p1=lectulandia_main_page.find("div")
+        # p2=p1.find("a",{"class":"title"})
+        # print(p2.get_text())
+
+        """
+        var_libros = var_libros +1
+        if var_libros > 5:
+            print("Chau")
+            #wb.save('/Users/aleira/Desktop/xlwt example11.xls') 
+            break
+        """
+        # else: None
+        # return None
+        # exit()
+        # get series url
+        # libros_test=lectulandia_main_page.find("div",{"class":"details"})
+        # libros_test = ftfy.fix_text(lectulandia_main_page.select("div.title")[0].text)
+        # ftfy.fix_text(series_page.select("div.fichseriedescrip")[0].text)
+        # print(libros_test.get_text())
+
+    exit()
+
+    var = 0
     with open(output_csv_path, mode='w') as series_file:
 
         series_writer = csv.writer(series_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         # write the headers.
         series_writer.writerow(["Series main_page_url", "Series name", "Ficha tecnica", "Resumen"])
+        sheet1.write(0, 0, 'Series main_page_url', style)
+        sheet1.write(0, 1, 'Series name', style)
+        sheet1.write(0, 2, 'Ficha tecnica', style)
+        sheet1.write(0, 3, 'Resumen', style)
+        row = 1
+        column = 0
+        # wb.save('/Users/aleira/Desktop/xlwt example7.xls')
 
         # get series
         for series in main_page.find("select", {"id": "serie"}):
+            #
             try:
 
                 # avoid series with invalid value.
                 if series is None or series == "\n" or series["value"] == "#":
                     continue
-
+                # for x in range(0,4):
                 # get series url
                 series_url = ftfy.fix_text(series["value"])
+                # print(series_url)
+                # break
                 # get series name
                 series_name = ftfy.fix_text(series.text)
 
@@ -81,10 +158,26 @@ def get_series_data():
 
                 # write new row in the csv
                 series_writer.writerow([series_url, series_name, technical_series_detail, description])
-
-                print(series_name)
+                # write new row in the Excel
+                sheet1.write(row, 0, series_url.lstrip())
+                sheet1.write(row, 1, series_name.lstrip())
+                sheet1.write(row, 2, technical_series_detail.lstrip())
+                sheet1.write(row, 3, description.lstrip())
+                row = row + 1
+                print("Serie: " + series_name, "URL de la serie: " + series_url)
+                # print(technical_series_detail.strip())
+                """
+                var = var +1
+                if var > 5:
+                    print("Chau")
+                    #wb.save('/Users/aleira/Desktop/xlwt example11.xls') 
+                    break
+                #else: None 
+                    #return None
+                """
             except Exception as ex:
                 log_error(str(ex))
+    wb.save('/Users/aleira/Desktop/xlwt example1.xls')
 
 
 get_series_data()
