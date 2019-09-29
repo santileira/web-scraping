@@ -15,6 +15,7 @@ def get_html_page(url: str) -> BeautifulSoup:
     Attempts to get the content at `main_page_url` by making an HTTP GET request.
     If the content-type of response is some kind of HTML/XML and status code is 200, convert the content to `Beautiful Soap` object, otherwise return None.
     """
+    #prueba agus
     try:
 
         # The closing() function ensures that any network resources are freed when they go out of scope in that with block.
