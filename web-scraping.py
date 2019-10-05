@@ -61,9 +61,10 @@ def get_series_data():
     # print ("Good bye!")
     # Workbook is created
     wb = Workbook()
+    excel_libros = Workbook()
 
     # add_sheet is used to create sheet.
-    sheet1 = wb.add_sheet('Catalogo de series')
+    primer_hoja = excel_libros.add_sheet('Catalogo de libros')
     # write(fila, columna)
     # Applying multiple styles
     style = xlwt.easyxf('font: bold 1, color black;')
@@ -79,6 +80,11 @@ def get_series_data():
     # t=lectulandia_main_page.find("article",{"class":"card"})
     # print(t)
     # exit()
+    primer_hoja.write(0, 0, 'Titulo', style)
+    primer_hoja.write(0, 1, 'Autor', style)
+    primer_hoja.write(0, 2, 'Genero', style)
+    primer_hoja.write(0, 3, 'Sinopsis', style)
+
     for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
         #
 
@@ -89,8 +95,22 @@ def get_series_data():
         # for x in range(0,4):
         try:
             div_titulo = libros.find("div", {"class": "details"})
-            titulo= div_titulo.find("a",{"class":"title"})
+            titulo = div_titulo.find("a",{"class":"title"})
+            titulo_href = "https://www.lectulandia.co" + titulo.attrs['href']
+            libro_details = get_html_page(titulo_href)
+            div_book_details = libro_details.find("div", {"id": "primary"})
+            description = div_book_details.find("div", {"id": "sinopsis"})
+            autor = div_book_details.find("div", {"id": "autor"})
+            genero = div_book_details.find("div", {"id": "genero"})
+
+
+
             print(titulo.attrs['title'])
+            #print(titulo_href)
+            print(autor.get_text())
+            print(description.get_text())
+            print(genero.get_text())
+            print("\n")
         except Exception:
             print("error")
         # print(lectulandia_main_page)
@@ -113,7 +133,7 @@ def get_series_data():
         # libros_test = ftfy.fix_text(lectulandia_main_page.select("div.title")[0].text)
         # ftfy.fix_text(series_page.select("div.fichseriedescrip")[0].text)
         # print(libros_test.get_text())
-
+    excel_libros.save('/Users/agustinleira/Desktop/xlwt example2.xls')
     exit()
 
     var = 0
