@@ -89,7 +89,7 @@ def get_series_data():
         #
 
         # test=lectulandia_main_page.find("article", {"class": "card"})
-        # avoid series with invalid value. Comento....
+        # avoid series with invalid value. Comento.... 27
         if libros is None or libros == "\n" or libros.name=="header":
            continue
         # for x in range(0,4):
