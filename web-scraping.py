@@ -84,6 +84,8 @@ def get_series_data():
     primer_hoja.write(0, 1, 'Autor', style)
     primer_hoja.write(0, 2, 'Genero', style)
     primer_hoja.write(0, 3, 'Sinopsis', style)
+    row = 1
+    column = 0
 
     for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
         #
@@ -101,15 +103,23 @@ def get_series_data():
             div_book_details = libro_details.find("div", {"id": "primary"})
             description = div_book_details.find("div", {"id": "sinopsis"})
             autor = div_book_details.find("div", {"id": "autor"})
+            autor_imp = autor.get_text()
+            autor_imp_2 = autor_imp.split(' ',1)[1]
             genero = div_book_details.find("div", {"id": "genero"})
-
+            genero_imp = genero.get_text()
+            genero_imp_2 = genero_imp.split(' ',1)[1]
+            primer_hoja.write(row, 0, titulo.attrs['title'])
+            primer_hoja.write(row, 1, autor_imp_2)
+            primer_hoja.write(row, 2, genero_imp_2)
+            primer_hoja.write(row, 3, description.get_text())
+            row = row + 1
 
 
             print(titulo.attrs['title'])
             #print(titulo_href)
-            print(autor.get_text())
+            print(autor_imp_2)
             print(description.get_text())
-            print(genero.get_text())
+            print(genero_imp_2)
             print("\n")
         except Exception:
             print("error")
@@ -133,7 +143,7 @@ def get_series_data():
         # libros_test = ftfy.fix_text(lectulandia_main_page.select("div.title")[0].text)
         # ftfy.fix_text(series_page.select("div.fichseriedescrip")[0].text)
         # print(libros_test.get_text())
-    excel_libros.save('/Users/agustinleira/Desktop/xlwt example2.xls')
+    excel_libros.save('/Users/aleira/Desktop/xlwt example3.xls')
     exit()
 
     var = 0
