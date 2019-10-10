@@ -9,7 +9,8 @@ from xlwt import Workbook
 
 main_page_url = "https://www.subtorrents1.com/series-1/"
 output_csv_path = "/Users/aleira/Desktop/series1.csv"
-lectulandia_main_page_url = "https://www.lectulandia.co/book/#post-57669"
+#lectulandia_main_page_url = "https://www.lectulandia.co/book/#post-57669"
+lectulandia_main_page_url = "https://www.lectulandia.co/book/"
 
 
 def get_html_page(url: str) -> BeautifulSoup:
@@ -49,52 +50,30 @@ def log_error(e):
 
 
 def get_series_data():
-    # try:
-    # var = 10
-    """                   # Second Example
-    while var > 0:
-       print ("Current variable value :"+ var)
-       var = var -1
-       if var == 5:
-          break
-    """
-    # print ("Good bye!")
-    # Workbook is created
+
     wb = Workbook()
     excel_libros = Workbook()
 
-    # add_sheet is used to create sheet.
     primer_hoja = excel_libros.add_sheet('Catalogo de libros')
-    # write(fila, columna)
-    # Applying multiple styles
-    style = xlwt.easyxf('font: bold 1, color black;')
 
-    # Writing on specified sheet
-    # sheet.write(0, 0, 'SAMPLE', style)
+    style = xlwt.easyxf('font: bold 1, color black;')
 
     main_page = get_html_page(main_page_url)
     lectulandia_main_page = get_html_page(lectulandia_main_page_url)
 
-    # get series
-    # var_libros = 0
-    # t=lectulandia_main_page.find("article",{"class":"card"})
-    # print(t)
-    # exit()
     primer_hoja.write(0, 0, 'Titulo', style)
     primer_hoja.write(0, 1, 'Autor', style)
     primer_hoja.write(0, 2, 'Genero', style)
     primer_hoja.write(0, 3, 'Sinopsis', style)
     row = 1
-    column = 0
+    cantidad_de_libros = 0
+    numero_de_pagina = 1
 
     for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
-        #
 
-        # test=lectulandia_main_page.find("article", {"class": "card"})
-        # avoid series with invalid value. Comento.... 27
         if libros is None or libros == "\n" or libros.name=="header":
            continue
-        # for x in range(0,4):
+
         try:
             div_titulo = libros.find("div", {"class": "details"})
             titulo = div_titulo.find("a",{"class":"title"})
@@ -113,37 +92,29 @@ def get_series_data():
             primer_hoja.write(row, 2, genero_imp_2)
             primer_hoja.write(row, 3, description.get_text())
             row = row + 1
-
+            cantidad_de_libros = cantidad_de_libros + 1
 
             print(titulo.attrs['title'])
-            #print(titulo_href)
             print(autor_imp_2)
             print(description.get_text())
             print(genero_imp_2)
             print("\n")
+
+            if cantidad_de_libros == 24:
+                #print("Chau")
+                numero_de_pagina = numero_de_pagina + 1
+                pagina_siguiente = "https://www.lectulandia.co/book/"+str(numero_de_pagina)+"/"
+                print(pagina_siguiente)
+                #lectulandia_main_page = get_html_page(lectulandia_main_page_url)
+                # wb.save('/Users/aleira/Desktop/xlwt example11.xls')
+                break
+            # else: None
+            # return None
         except Exception:
             print("error")
-        # print(lectulandia_main_page)
-        # p1=lectulandia_main_page.find("div")
-        # p2=p1.find("a",{"class":"title"})
-        # print(p2.get_text())
 
-        """
-        var_libros = var_libros +1
-        if var_libros > 5:
-            print("Chau")
-            #wb.save('/Users/aleira/Desktop/xlwt example11.xls') 
-            break
-        """
-        # else: None
-        # return None
-        # exit()
-        # get series url
-        # libros_test=lectulandia_main_page.find("div",{"class":"details"})
-        # libros_test = ftfy.fix_text(lectulandia_main_page.select("div.title")[0].text)
-        # ftfy.fix_text(series_page.select("div.fichseriedescrip")[0].text)
-        # print(libros_test.get_text())
-    excel_libros.save('/Users/aleira/Desktop/xlwt example3.xls')
+    excel_libros.save('/Users/aleira/Desktop/xlwt example5.xls')
+    print(cantidad_de_libros)
     exit()
 
     var = 0
