@@ -1,4 +1,5 @@
 import csv
+import time
 
 from requests import get
 from requests.exceptions import RequestException
@@ -6,6 +7,7 @@ from contextlib import closing
 from bs4 import BeautifulSoup
 import ftfy
 import datetime
+
 main_page_url = "https://www.subtorrents1.com/series-1/"
 output_csv_path = "/Users/sleira/Personal/series.csv"
 
@@ -47,7 +49,7 @@ def log_error(e):
 
 
 def get_series_data():
-    print(datetime.datetime.utcnow())
+    start = time.perf_counter()
     main_page = get_html_page(main_page_url)
     with open(output_csv_path, mode='w') as series_file:
 
@@ -84,6 +86,9 @@ def get_series_data():
                 print(series_name)
             except Exception as ex:
                 log_error(str(ex))
+    elapsed = time.perf_counter() - start
+    print(f"Program completed in {elapsed:0.5f} seconds.")
 
 
 get_series_data()
+# Program completed in 1141.19031 seconds.

@@ -4,7 +4,9 @@ requires = [
     'requests',
     'bs4',
     'ftfy',
-    'datetime'
+    'datetime',
+    'aiohttp',
+    'aiofile'
 ]
 
 setup(

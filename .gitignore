@@ -105,4 +105,6 @@ venv.bak/
 
 .idea/
 
-web-scraping-env/
+web_scraping_env/
+
+web_scraping.egg-info/
