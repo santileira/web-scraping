@@ -12,6 +12,8 @@ output_csv_path = "/Users/aleira/Desktop/series1.csv"
 #lectulandia_main_page_url = "https://www.lectulandia.co/book/#post-57669"
 lectulandia_main_page_url = "https://www.lectulandia.co/book/"
 
+#numero_de_pagina = 1
+
 
 def get_html_page(url: str) -> BeautifulSoup:
     """
@@ -53,67 +55,64 @@ def get_series_data():
 
     wb = Workbook()
     excel_libros = Workbook()
-
     primer_hoja = excel_libros.add_sheet('Catalogo de libros')
-
     style = xlwt.easyxf('font: bold 1, color black;')
-
     main_page = get_html_page(main_page_url)
     lectulandia_main_page = get_html_page(lectulandia_main_page_url)
-
-    primer_hoja.write(0, 0, 'Titulo', style)
-    primer_hoja.write(0, 1, 'Autor', style)
+    primer_hoja.write(0, 0, 'Autor', style)
+    primer_hoja.write(0, 1, 'Titulo', style)
     primer_hoja.write(0, 2, 'Genero', style)
     primer_hoja.write(0, 3, 'Sinopsis', style)
     row = 1
     cantidad_de_libros = 0
     numero_de_pagina = 1
 
-    for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
+    for paginas in range(1563):
+        for libros in lectulandia_main_page.find("main", {"id": "main"}):  # aca va un find_all
 
-        if libros is None or libros == "\n" or libros.name=="header":
-           continue
+            if libros is None or libros == "\n" or libros.name=="header":
+               continue
 
-        try:
-            div_titulo = libros.find("div", {"class": "details"})
-            titulo = div_titulo.find("a",{"class":"title"})
-            titulo_href = "https://www.lectulandia.co" + titulo.attrs['href']
-            libro_details = get_html_page(titulo_href)
-            div_book_details = libro_details.find("div", {"id": "primary"})
-            description = div_book_details.find("div", {"id": "sinopsis"})
-            autor = div_book_details.find("div", {"id": "autor"})
-            autor_imp = autor.get_text()
-            autor_imp_2 = autor_imp.split(' ',1)[1]
-            genero = div_book_details.find("div", {"id": "genero"})
-            genero_imp = genero.get_text()
-            genero_imp_2 = genero_imp.split(' ',1)[1]
-            primer_hoja.write(row, 0, titulo.attrs['title'])
-            primer_hoja.write(row, 1, autor_imp_2)
-            primer_hoja.write(row, 2, genero_imp_2)
-            primer_hoja.write(row, 3, description.get_text())
-            row = row + 1
-            cantidad_de_libros = cantidad_de_libros + 1
+            try:
+                div_titulo = libros.find("div", {"class": "details"})
+                titulo = div_titulo.find("a",{"class":"title"})
+                titulo_href = "https://www.lectulandia.co" + titulo.attrs['href']
+                libro_details = get_html_page(titulo_href)
+                div_book_details = libro_details.find("div", {"id": "primary"})
+                description = div_book_details.find("div", {"id": "sinopsis"})
+                autor = div_book_details.find("div", {"id": "autor"})
+                autor_imp = autor.get_text()
+                autor_imp_2 = autor_imp.split(' ',1)[1]
+                genero = div_book_details.find("div", {"id": "genero"})
+                genero_imp = genero.get_text()
+                genero_imp_2 = genero_imp.split(' ',1)[1]
+                primer_hoja.write(row, 0, autor_imp_2)
+                primer_hoja.write(row, 1, titulo.attrs['title'])
+                primer_hoja.write(row, 2, genero_imp_2)
+                primer_hoja.write(row, 3, description.get_text())
+                row = row + 1
+                cantidad_de_libros = cantidad_de_libros + 1
 
-            print(titulo.attrs['title'])
-            print(autor_imp_2)
-            print(description.get_text())
-            print(genero_imp_2)
-            print("\n")
+                print(titulo.attrs['title'])
+                print(autor_imp_2)
+                print(description.get_text())
+                print(genero_imp_2)
+                print("\n")
 
-            if cantidad_de_libros == 24:
-                #print("Chau")
-                numero_de_pagina = numero_de_pagina + 1
-                pagina_siguiente = "https://www.lectulandia.co/book/"+str(numero_de_pagina)+"/"
-                print(pagina_siguiente)
-                #lectulandia_main_page = get_html_page(lectulandia_main_page_url)
-                # wb.save('/Users/aleira/Desktop/xlwt example11.xls')
-                break
-            # else: None
-            # return None
-        except Exception:
-            print("error")
+                if cantidad_de_libros == 24:
+                    numero_de_pagina = numero_de_pagina + 1
 
-    excel_libros.save('/Users/aleira/Desktop/xlwt example5.xls')
+                    pagina_siguiente = "https://www.lectulandia.co/book/page/"+str(numero_de_pagina)+"/" #"https://www.lectulandia.co/book/page/2/"
+                    lectulandia_main_page = get_html_page(pagina_siguiente)
+                    print(pagina_siguiente)
+                    cantidad_de_libros = 0
+                    break
+                # else: None
+                # return None
+            except Exception:
+                print("error")
+
+    excel_libros.save('/Users/aleira/Desktop/xlwt example61.xls')
     print(cantidad_de_libros)
     exit()
 
